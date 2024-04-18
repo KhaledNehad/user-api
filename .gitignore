@@ -1,0 +1,13 @@
+**/*.env*
+*.log
+*.log.gz
+**/*.pem
+
+# OS files
+**/.DS_Store
+
+# IDE/util files
+**/.idea/
+**/*.iml
+**/*.sublime-*
+.vercel
