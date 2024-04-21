@@ -3,24 +3,59 @@ import {
   Get,
   Post,
   Body,
+  UseGuards,
   Patch,
   Param,
-  Delete,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationQueryDto } from '@app/app/common/dto/pagination-query.dto';
-import { UserResponse } from './types/userResponse.interface';
+import { UserResponseInterface } from './types/userResponse.interface';
+import { LoginUserDto } from './dto/login-user.dto';
+import { User } from './decorators/user.decorator';
+import { UserEntity } from './entities/user.entity';
+import { AuthGuard } from './guards/auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponse> {
-    const user = await this.usersService.create(createUserDto);
+  @Post('register')
+  async register(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<UserResponseInterface> {
+    const user = await this.usersService.register(createUserDto);
+    return this.usersService.buildUserResponse(user);
+  }
+
+  @Post('login')
+  async login(
+    @Body() loginUserDto: LoginUserDto,
+  ): Promise<UserResponseInterface> {
+    const user = await this.usersService.login(loginUserDto);
+    return this.usersService.buildUserResponse(user);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  async currentUser(@User() user: UserEntity): Promise<UserResponseInterface> {
+    return this.usersService.buildUserResponse(user);
+  }
+
+  @Patch('update_profile/:id')
+  @UseGuards(AuthGuard)
+  async updateCurrentUser(
+    @User('id') currentUserId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseInterface> {
+    const user = await this.usersService.updateUser(
+      currentUserId,
+      updateUserDto,
+    );
+
     return this.usersService.buildUserResponse(user);
   }
 
@@ -31,12 +66,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.findById(id);
   }
 
   @Delete(':id')
