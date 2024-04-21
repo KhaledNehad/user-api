@@ -1,0 +1,68 @@
+Table users {
+    user_id int [primary key]
+    username varchar(50) [not null]
+    password varchar(50) [not null]
+    email varchar(100)
+    full_name varchar(100) // Full name of the user
+    phone_number varchar(20) // User's phone number
+    date_of_birth date // Date of birth of the user
+    address varchar(255) // User's address
+    role_id int [ref: > roles.role_id] // Relationship with Role Table
+}
+
+Table wallet {
+    wallet_id int [primary key]
+    user_id int [unique, ref: > users.user_id]
+    balance numeric(15)
+    currency varchar(3) // Assuming currency is represented as a three-letter code
+}
+
+Table session {
+    session_id int [primary key]
+    user_id int [ref: > users.user_id] // Relationship with Users Table
+    session_token varchar(255) [unique]
+    expiration_date timestamp // Session token expiration date
+    // Other session-related columns
+}
+
+Table roles {
+    role_id int [primary key]
+    role_name varchar(50) [unique]
+    // Other role-related columns
+}
+
+Table action_type {
+    action_type_id int [primary key]
+    action_name varchar(50) [unique]
+    // Other action type-related columns
+}
+
+Table audit_log {
+    log_id int [primary key]
+    user_id int [ref: > users.user_id] // Relationship with Users Table
+    action_type_id int [ref: > action_type.action_type_id] // Relationship with Action Type Table
+    timestamp timestamp [default: `CURRENT_TIMESTAMP`] // Timestamp of the action
+}
+
+Table sender {
+    sender_id int [primary key]
+    user_id int [unique, ref: > users.user_id]
+}
+
+Table receiver {
+    receiver_id int [primary key]
+    user_id int [unique, ref: > users.user_id]
+}
+
+Table transaction {
+    transaction_id int [primary key]
+    sender_id int [ref: > sender.sender_id]
+    receiver_id int [ref: > receiver.receiver_id]
+    amount numeric(15)
+    currency varchar(3)
+    timestamp timestamp [default: `CURRENT_TIMESTAMP`]
+    status varchar(20)
+    transaction_type varchar(10)
+    description text
+    user_id int [ref: > users.user_id]
+}
