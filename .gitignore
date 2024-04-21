@@ -11,3 +11,7 @@
 **/*.iml
 **/*.sublime-*
 .vercel
+
+node_modules/
+dist/
+.turbo/
