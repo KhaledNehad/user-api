@@ -45,7 +45,7 @@ export class UsersController {
     return this.usersService.buildUserResponse(user);
   }
 
-  @Patch('update_profile/:id')
+  @Patch(':id')
   @UseGuards(AuthGuard)
   async updateCurrentUser(
     @User('id') currentUserId: string,
@@ -70,7 +70,8 @@ export class UsersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @UseGuards(AuthGuard)
+  removeUser(@Param('id') id: string) {
+    return this.usersService.removeUser(id);
   }
 }

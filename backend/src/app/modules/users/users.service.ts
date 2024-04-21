@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { PaginationQueryDto } from '@app/app/common/dto/pagination-query.dto';
 import { sign } from 'jsonwebtoken';
 import { UserResponseInterface } from './types/userResponse.interface';
-import { compare, hash } from 'bcrypt';
+import { compare, genSalt, hash } from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
@@ -99,11 +99,19 @@ export class UsersService {
 
     Object.assign(user, updateUserDto, { password: hashedPassword });
 
-    return this.userRepository.save(user);
+    return await this.userRepository.save(user);
   }
 
   //! Remove user
-  remove(id: string) {
+  removeUser(id: string) {
+    if (!id || id === '') {
+      throw new HttpException('Id not provided', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!this.findById(id)) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
     return this.userRepository.delete(id);
   }
 
@@ -120,8 +128,41 @@ export class UsersService {
   }
 
   hashUpdatePassword(password: string): Promise<string> {
-    return hash(password, process.env.BCRYPT_SALT_ROUNDS);
+    return new Promise((resolve, reject) => {
+      genSalt(10, (err, salt) => {
+        if (err) {
+          reject(
+            new HttpException(
+              'Something went wrong',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        }
+
+        hash(password, salt, (err, hashedPassword) => {
+          if (err) {
+            reject(
+              new HttpException(
+                'Something went wrong',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+              ),
+            );
+          }
+
+          resolve(hashedPassword);
+        });
+      });
+    });
   }
+
+  // bcrypt.genSalt(10,(err,salt) => {
+  //  	bcrypt.hash(newUser.password, salt , (err, hash) =>{
+  //       if(err) throw (err);
+
+  //       newUser.password=hash;
+  //       newUser.save(callback);
+  //  	});
+  //  });
 
   buildUserResponse(user: UserEntity): UserResponseInterface {
     return {
