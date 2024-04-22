@@ -19,11 +19,11 @@ import { User } from './decorators/user.decorator';
 import { UserEntity } from './entities/user.entity';
 import { AuthGuard } from './guards/auth.guard';
 
-@Controller('users')
+@Controller('api')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('register')
+  @Post('auth/register')
   async register(
     @Body() createUserDto: CreateUserDto,
   ): Promise<UserResponseInterface> {
@@ -31,7 +31,7 @@ export class UsersController {
     return this.usersService.buildUserResponse(user);
   }
 
-  @Post('login')
+  @Post('auth/login')
   async login(
     @Body() loginUserDto: LoginUserDto,
   ): Promise<UserResponseInterface> {
@@ -39,13 +39,15 @@ export class UsersController {
     return this.usersService.buildUserResponse(user);
   }
 
-  @Get('me')
+  // Get current user
+  @Get('auth/user')
   @UseGuards(AuthGuard)
   async currentUser(@User() user: UserEntity): Promise<UserResponseInterface> {
     return this.usersService.buildUserResponse(user);
   }
 
-  @Patch(':id')
+  // Update user
+  @Patch('user/:id')
   @UseGuards(AuthGuard)
   async updateCurrentUser(
     @User('id') currentUserId: string,
@@ -58,18 +60,20 @@ export class UsersController {
 
     return this.usersService.buildUserResponse(user);
   }
-
-  @Get()
+  // Get all users
+  @Get('users')
   findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.usersService.findAll(paginationQuery);
   }
 
-  @Get(':id')
+  // Get user by id
+  @Get('users/:id')
   findOne(@Param('id') id: string) {
     return this.usersService.findById(id);
   }
 
-  @Delete(':id')
+  // Delete user
+  @Delete('users/:id')
   @UseGuards(AuthGuard)
   removeUser(@Param('id') id: string) {
     return this.usersService.removeUser(id);
