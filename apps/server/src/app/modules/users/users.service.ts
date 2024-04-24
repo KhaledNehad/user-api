@@ -20,7 +20,7 @@ export class UsersService {
   //! Register user
   async register(createUserDto: CreateUserDto): Promise<UserEntity> {
     const userByEmail = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { email: createUserDto.email.toLowerCase() },
     });
 
     if (userByEmail) {
