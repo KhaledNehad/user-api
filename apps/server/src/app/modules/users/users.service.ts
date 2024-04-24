@@ -48,9 +48,9 @@ export class UsersService {
       );
     }
 
-    const arePasswordsEqual = await compare(password, user.password);
+    const isPasswordCorrect = await compare(password, user.password);
 
-    if (!arePasswordsEqual) {
+    if (!isPasswordCorrect) {
       throw new HttpException(
         'Wrong credentials provided',
         HttpStatus.UNAUTHORIZED,
