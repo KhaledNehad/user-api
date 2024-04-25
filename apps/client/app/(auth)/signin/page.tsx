@@ -1,7 +1,7 @@
-import SingInForm from "@/components/forms/SingInForm";
+import { SignInForm } from "@/components/forms/SignInForm";
 
 function SigninForm() {
-  return <SingInForm />;
+  return <SignInForm />;
 }
 
 export default SigninForm;

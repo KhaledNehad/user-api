@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useFormState } from "react-dom";
+import { loginUserAction } from "@/data/actions/auth-action";
 
 import {
   CardTitle,
@@ -13,11 +15,22 @@ import {
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { ZodErrors } from "@/components/custom/ZodErrors";
+import { ServerErrors } from "../custom/ServerErrors";
+import { SubmitButton } from "@/components/custom/SubmitButton";
 
-function SingInForm() {
+const INITIAL_STATE = {
+  zodErrors: null,
+  serverErrors: null,
+  data: null,
+  message: null,
+};
+
+export function SignInForm() {
+  const [formState, formAction] = useFormState(loginUserAction, INITIAL_STATE);
   return (
     <div className="w-full max-w-md">
-      <form>
+      <form action={formAction}>
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
@@ -28,12 +41,8 @@ function SingInForm() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="identifier"
-                name="identifier"
-                type="text"
-                placeholder="username or email"
-              />
+              <Input id="email" name="email" type="email" placeholder="email" />
+              <ZodErrors error={formState?.zodErrors?.email} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -43,14 +52,20 @@ function SingInForm() {
                 type="password"
                 placeholder="password"
               />
+              <ZodErrors error={formState.zodErrors?.password} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col">
-            <button className="w-full">Sign In</button>
+            <SubmitButton
+              className="w-full"
+              text="Sign In"
+              loadingText="Loading"
+            />
+            <ServerErrors error={formState?.message} />
           </CardFooter>
         </Card>
         <div className="mt-4 text-center text-sm">
-          Dont have an account?
+          Don&lsquo;t have an account?
           <Link className="underline ml-2" href="signup">
             Sign Up
           </Link>
@@ -59,5 +74,3 @@ function SingInForm() {
     </div>
   );
 }
-
-export default SingInForm;

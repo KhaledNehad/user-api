@@ -40,7 +40,7 @@ export class UsersController {
   }
 
   // Get current user
-  @Get('auth/user')
+  @Get('users/me')
   @UseGuards(AuthGuard)
   async currentUser(@User() user: UserEntity): Promise<UserResponseInterface> {
     return this.usersService.buildUserResponse(user);

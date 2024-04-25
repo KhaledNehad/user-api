@@ -1,7 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { registerUserService } from "@/data/services/auth-service";
+import {
+  loginUseService,
+  registerUserService,
+} from "@/data/services/auth-service";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -52,6 +55,56 @@ export async function registerUserAction(prevState: any, formData: FormData) {
     };
   }
 
-  cookies().set("token", response.user.token, config);
+  cookies().set("authToken", response.user.token, config);
   redirect("/dashboard");
+}
+
+const schemaLogin = z.object({
+  email: z.string().email({
+    message: "Please enter a valid email address",
+  }),
+  password: z
+    .string()
+    .min(6, {
+      message: "Password must be at least 6 characters",
+    })
+    .max(100, { message: "Password must be between 6 and 100 characters" }),
+});
+
+export async function loginUserAction(prevState: any, formData: FormData) {
+  const validatedFields = schemaLogin.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      ...prevState,
+      ZodError: validatedFields.error.flatten().fieldErrors,
+      data: null,
+      message: "Missing Fields. Failed to login",
+    };
+  }
+
+  const response = await loginUseService(validatedFields.data);
+
+  if (response.message) {
+    return {
+      ...prevState,
+      data: null,
+      ZodError: null,
+      message: response,
+    };
+  }
+
+  cookies().set("authToken", response.user.token);
+  redirect("/dashboard");
+}
+
+export async function logoutUserAction() {
+  cookies().set("authToken", "", {
+    ...config,
+    maxAge: 0,
+  });
+  redirect("/signin");
 }
