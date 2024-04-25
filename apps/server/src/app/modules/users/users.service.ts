@@ -20,7 +20,9 @@ export class UsersService {
   //! Register user
   async register(createUserDto: CreateUserDto): Promise<UserEntity> {
     const userByEmail = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: {
+        email: createUserDto.email,
+      },
     });
 
     if (userByEmail) {
@@ -48,9 +50,9 @@ export class UsersService {
       );
     }
 
-    const arePasswordsEqual = await compare(password, user.password);
+    const isPasswordCorrect = await compare(password, user.password);
 
-    if (!arePasswordsEqual) {
+    if (!isPasswordCorrect) {
       throw new HttpException(
         'Wrong credentials provided',
         HttpStatus.UNAUTHORIZED,
