@@ -24,6 +24,6 @@ export class UserEntity {
     this.password = await hash(this.password, 10);
   }
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 }
